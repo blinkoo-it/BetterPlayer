@@ -4,6 +4,7 @@
 
 #import "BetterPlayer.h"
 #import <better_player/better_player-Swift.h>
+#import <GSPlayer/GSPlayer-Swift.h>
 
 static void* timeRangeContext = &timeRangeContext;
 static void* statusContext = &statusContext;
@@ -26,11 +27,14 @@ AVPictureInPictureController *_pipController;
     _isInitialized = false;
     _isPlaying = false;
     _disposed = false;
-    _player = [[AVPlayer alloc] init];
-    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    _player = [VideoPlayerView new];
+
+    //TODO: check
+    //_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
     ///Fix for loading large videos
     if (@available(iOS 10.0, *)) {
-        _player.automaticallyWaitsToMinimizeStalling = false;
+        //TODO: check
+        //_player.automaticallyWaitsToMinimizeStalling = false;
     }
     self._observersAdded = false;
     return self;
@@ -42,7 +46,7 @@ AVPictureInPictureController *_pipController;
     return playerView;
 }
 
-- (void)addObservers:(AVPlayerItem*)item {
+- (void)addObservers:(VideoPlayerView*)item {
     if (!self._observersAdded){
         [_player addObserver:self forKeyPath:@"rate" options:0 context:nil];
         [item addObserver:self forKeyPath:@"loadedTimeRanges" options:0 context:timeRangeContext];
@@ -60,10 +64,6 @@ AVPictureInPictureController *_pipController;
                forKeyPath:@"playbackBufferFull"
                   options:0
                   context:playbackBufferFullContext];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(itemDidPlayToEndTime:)
-                                                     name:AVPlayerItemDidPlayToEndTimeNotification
-                                                   object:item];
         self._observersAdded = true;
     }
 }
@@ -74,7 +74,7 @@ AVPictureInPictureController *_pipController;
     _disposed = false;
     _failedCount = 0;
     _key = nil;
-    if (_player.currentItem == nil) {
+    /*if (_player.currentItem == nil) {
         return;
     }
 
@@ -84,32 +84,24 @@ AVPictureInPictureController *_pipController;
 
     [self removeObservers];
     AVAsset* asset = [_player.currentItem asset];
-    [asset cancelLoading];
+    [asset cancelLoading];*/
 }
 
 - (void) removeObservers{
     if (self._observersAdded){
         [_player removeObserver:self forKeyPath:@"rate" context:nil];
-        [[_player currentItem] removeObserver:self forKeyPath:@"status" context:statusContext];
-        [[_player currentItem] removeObserver:self forKeyPath:@"presentationSize" context:presentationSizeContext];
-        [[_player currentItem] removeObserver:self
-                                   forKeyPath:@"loadedTimeRanges"
-                                      context:timeRangeContext];
-        [[_player currentItem] removeObserver:self
-                                   forKeyPath:@"playbackLikelyToKeepUp"
-                                      context:playbackLikelyToKeepUpContext];
-        [[_player currentItem] removeObserver:self
-                                   forKeyPath:@"playbackBufferEmpty"
-                                      context:playbackBufferEmptyContext];
-        [[_player currentItem] removeObserver:self
-                                   forKeyPath:@"playbackBufferFull"
-                                      context:playbackBufferFullContext];
+        [_player removeObserver:self forKeyPath:@"status" context:statusContext];
+        [_player removeObserver:self forKeyPath:@"presentationSize" context:presentationSizeContext];
+        [_player removeObserver:self forKeyPath:@"loadedTimeRanges" context:timeRangeContext];
+        [_player removeObserver:self forKeyPath:@"playbackLikelyToKeepUp" context:playbackLikelyToKeepUpContext];
+        [_player removeObserver:self forKeyPath:@"playbackBufferEmpty" context:playbackBufferEmptyContext];
+        [_player removeObserver:self forKeyPath:@"playbackBufferFull" context:playbackBufferFullContext];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self._observersAdded = false;
     }
 }
 
-- (void)itemDidPlayToEndTime:(NSNotification*)notification {
+/*- (void)itemDidPlayToEndTime:(NSNotification*)notification {
     if (_isLooping) {
         AVPlayerItem* p = [notification object];
         [p seekToTime:kCMTimeZero completionHandler:nil];
@@ -117,7 +109,6 @@ AVPictureInPictureController *_pipController;
         if (_eventSink) {
             _eventSink(@{@"event" : @"completed", @"key" : _key});
             [ self removeObservers];
-
         }
     }
 }
@@ -301,7 +292,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 
 - (NSTimeInterval) availableDuration
 {
-    NSArray *loadedTimeRanges = [[_player currentItem] loadedTimeRanges];
+    NSArray *loadedTimeRanges = [[_player player] loadedTimeRanges];
     if (loadedTimeRanges.count > 0){
         CMTimeRange timeRange = [[loadedTimeRanges objectAtIndex:0] CMTimeRangeValue];
         Float64 startSeconds = CMTimeGetSeconds(timeRange.start);
@@ -708,7 +699,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 
     }
 
-}
+}*/
 
 - (void)setMixWithOthers:(bool)mixWithOthers {
   if (mixWithOthers) {
@@ -720,9 +711,9 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
   }
 }
 
-
+/*
 #endif
-
+*/
 - (FlutterError* _Nullable)onCancelWithArguments:(id _Nullable)arguments {
     _eventSink = nil;
     return nil;
@@ -736,7 +727,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
     // This line ensures the 'initialized' event is sent when the event
     // 'AVPlayerItemStatusReadyToPlay' fires before _eventSink is set (this function
     // onListenWithArguments is called)
-    [self onReadyToPlay];
+    //[self onReadyToPlay];
     return nil;
 }
 
@@ -753,11 +744,11 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 }
 
 - (void)dispose {
-    [self pause];
+    //[self pause];
     [self disposeSansEventChannel];
     [_eventChannel setStreamHandler:nil];
-    [self disablePictureInPicture];
-    [self setPictureInPicture:false];
+    //[self disablePictureInPicture];
+    //[self setPictureInPicture:false];
     _disposed = true;
 }
 

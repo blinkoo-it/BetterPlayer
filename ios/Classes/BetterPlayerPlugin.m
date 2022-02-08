@@ -4,6 +4,7 @@
 
 #import "BetterPlayerPlugin.h"
 #import <better_player/better_player-Swift.h>
+#import <GSPlayer/GSPlayer-Swift.h>
 
 #if !__has_feature(objc_arc)
 #error Code Requires ARC.
@@ -14,7 +15,6 @@
 NSMutableDictionary* _dataSourceDict;
 NSMutableDictionary*  _timeObserverIdDict;
 NSMutableDictionary*  _artworkImageDict;
-CacheManager* _cacheManager;
 int texturesCount = -1;
 BetterPlayer* _notificationPlayer;
 bool _remoteCommandsInitialized = false;
@@ -40,8 +40,8 @@ bool _remoteCommandsInitialized = false;
     _timeObserverIdDict = [NSMutableDictionary dictionary];
     _artworkImageDict = [NSMutableDictionary dictionary];
     _dataSourceDict = [NSMutableDictionary dictionary];
-    _cacheManager = [[CacheManager alloc] init];
-    [_cacheManager setup];
+    //_cacheManager = [[CacheManager alloc] init];
+    //[_cacheManager setup];
     return self;
 }
 
@@ -167,7 +167,7 @@ bool _remoteCommandsInitialized = false;
                 MPChangePlaybackPositionCommandEvent * playbackEvent = (MPChangePlaybackRateCommandEvent * ) event;
                 CMTime time = CMTimeMake(playbackEvent.positionTime, 1);
                 int64_t millis = [BetterPlayerTimeUtils FLTCMTimeToMillis:(time)];
-                [_notificationPlayer seekTo: millis];
+                [_notificationPlayer.player seekTo: time completion:nil];
                 _notificationPlayer.eventSink(@{@"event" : @"seek", @"position": @(millis)});
             }
             return MPRemoteCommandHandlerStatusSuccess;
@@ -177,8 +177,8 @@ bool _remoteCommandsInitialized = false;
 }
 
 - (void) setupRemoteCommandNotification:(BetterPlayer*)player, NSString* title, NSString* author , NSString* imageUrl{
-    float positionInSeconds = player.position /1000;
-    float durationInSeconds = player.duration/ 1000;
+    float positionInSeconds = player.player.currentDuration /1000;
+    float durationInSeconds = player.player.totalDuration / 1000;
 
 
     NSMutableDictionary * nowPlayingInfoDict = [@{MPMediaItemPropertyArtist: author,
@@ -236,12 +236,12 @@ bool _remoteCommandsInitialized = false;
 }
 
 - (void) setupUpdateListener:(BetterPlayer*)player,NSString* title, NSString* author,NSString* imageUrl  {
-    id _timeObserverId = [player.player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:NULL usingBlock:^(CMTime time){
+    /*id _timeObserverId = [player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:NULL usingBlock:^(CMTime time){
         [self setupRemoteCommandNotification:player, title, author, imageUrl];
     }];
 
     NSString* key =  [self getTextureId:player];
-    [ _timeObserverIdDict setObject:_timeObserverId forKey: key];
+    [ _timeObserverIdDict setObject:_timeObserverId forKey: key];*/
 }
 
 
@@ -303,13 +303,12 @@ bool _remoteCommandsInitialized = false;
             [_dataSourceDict setObject:dataSource forKey:[self getTextureId:player]];
             NSString* assetArg = dataSource[@"asset"];
             NSString* uriArg = dataSource[@"uri"];
-            NSString* key = dataSource[@"key"];
+            /*NSString* key = dataSource[@"key"];
             NSString* certificateUrl = dataSource[@"certificateUrl"];
             NSString* licenseUrl = dataSource[@"licenseUrl"];
             NSDictionary* headers = dataSource[@"headers"];
             NSString* cacheKey = dataSource[@"cacheKey"];
-            NSNumber* maxCacheSize = dataSource[@"maxCacheSize"];
-            NSString* videoExtension = dataSource[@"videoExtension"];
+            NSString* videoExtension = dataSource[@"videoExtension"];*/
             
             int overriddenDuration = 0;
             if ([dataSource objectForKey:@"overriddenDuration"] != [NSNull null]){
@@ -320,13 +319,6 @@ bool _remoteCommandsInitialized = false;
             id useCacheObject = [dataSource objectForKey:@"useCache"];
             if (useCacheObject != [NSNull null]) {
                 useCache = [[dataSource objectForKey:@"useCache"] boolValue];
-                if (useCache){
-                    [_cacheManager setMaxCacheSize:maxCacheSize];
-                }
-            }
-
-            if (headers == [NSNull null] || headers == NULL){
-                headers = @{};
             }
 
             if (assetArg) {
@@ -337,9 +329,9 @@ bool _remoteCommandsInitialized = false;
                 } else {
                     assetPath = [_registrar lookupKeyForAsset:assetArg];
                 }
-                [player setDataSourceAsset:assetPath withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration];
             } else if (uriArg) {
-                [player setDataSourceURL:[NSURL URLWithString:uriArg] withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl withHeaders:headers withCache: useCache cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration videoExtension: videoExtension];
+                [player.player playFor:[NSURL URLWithString:uriArg] with:useCache];
+                /*[player setDataSourceURL:[NSURL URLWithString:uriArg] withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl withHeaders:headers withCache: useCache cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration videoExtension: videoExtension];*/
             } else {
                 result(FlutterMethodNotImplemented);
             }
@@ -373,37 +365,37 @@ bool _remoteCommandsInitialized = false;
             [player setIsLooping:[argsMap[@"looping"] boolValue]];
             result(nil);
         } else if ([@"setVolume" isEqualToString:call.method]) {
-            [player setVolume:[argsMap[@"volume"] doubleValue]];
+            [player.player setVolume:[argsMap[@"volume"] doubleValue]];
             result(nil);
         } else if ([@"play" isEqualToString:call.method]) {
             [self setupRemoteNotification:player];
-            [player play];
+            [player.player resume];
             result(nil);
         } else if ([@"position" isEqualToString:call.method]) {
-            result(@([player position]));
+            result(@([player.player currentDuration]));
         } else if ([@"absolutePosition" isEqualToString:call.method]) {
-            result(@([player absolutePosition]));
+            result(@([player.player totalDuration]));
         } else if ([@"seekTo" isEqualToString:call.method]) {
-            [player seekTo:[argsMap[@"location"] intValue]];
+            //[player.player seekTo:[argsMap[@"location"] intValue] completion:nil];
             result(nil);
         } else if ([@"pause" isEqualToString:call.method]) {
-            [player pause];
+            [player.player pause];
             result(nil);
         } else if ([@"setSpeed" isEqualToString:call.method]) {
-            [player setSpeed:[[argsMap objectForKey:@"speed"] doubleValue] result:result];
+            //[player.player setSpeed:[[argsMap objectForKey:@"speed"] doubleValue] result:result];
         }else if ([@"setTrackParameters" isEqualToString:call.method]) {
-            int width = [argsMap[@"width"] intValue];
+            /*int width = [argsMap[@"width"] intValue];
             int height = [argsMap[@"height"] intValue];
             int bitrate = [argsMap[@"bitrate"] intValue];
 
-            [player setTrackParameters:width: height : bitrate];
+            [player setTrackParameters:width: height : bitrate];*/
             result(nil);
         } else if ([@"enablePictureInPicture" isEqualToString:call.method]){
-            double left = [argsMap[@"left"] doubleValue];
+            /*double left = [argsMap[@"left"] doubleValue];
             double top = [argsMap[@"top"] doubleValue];
             double width = [argsMap[@"width"] doubleValue];
             double height = [argsMap[@"height"] doubleValue];
-            [player enablePictureInPicture:CGRectMake(left, top, width, height)];
+            [player enablePictureInPicture:CGRectMake(left, top, width, height)];*/
         } else if ([@"isPictureInPictureSupported" isEqualToString:call.method]){
             if (@available(iOS 9.0, *)){
                 if ([AVPictureInPictureController isPictureInPictureSupported]){
@@ -414,45 +406,39 @@ bool _remoteCommandsInitialized = false;
 
             result([NSNumber numberWithBool:false]);
         } else if ([@"disablePictureInPicture" isEqualToString:call.method]){
-            [player disablePictureInPicture];
-            [player setPictureInPicture:false];
+            /*[player disablePictureInPicture];
+            [player setPictureInPicture:false];*/
         } else if ([@"setAudioTrack" isEqualToString:call.method]){
-            NSString* name = argsMap[@"name"];
+            /*NSString* name = argsMap[@"name"];
             int index = [argsMap[@"index"] intValue];
-            [player setAudioTrack:name index: index];
+            [player setAudioTrack:name index: index];*/
         } else if ([@"setMixWithOthers" isEqualToString:call.method]){
             [player setMixWithOthers:[argsMap[@"mixWithOthers"] boolValue]];
         } else if ([@"preCache" isEqualToString:call.method]){
             NSDictionary* dataSource = argsMap[@"dataSource"];
             NSString* urlArg = dataSource[@"uri"];
-            NSString* cacheKey = dataSource[@"cacheKey"];
             NSDictionary* headers = dataSource[@"headers"];
             NSNumber* maxCacheSize = dataSource[@"maxCacheSize"];
             NSString* videoExtension = dataSource[@"videoExtension"];
             
-            if (headers == [ NSNull null ]){
-                headers = @{};
-            }
-            if (videoExtension == [NSNull null]){
-                videoExtension = nil;
-            }
-            
             if (urlArg != [NSNull null]){
                 NSURL* url = [NSURL URLWithString:urlArg];
-                if ([_cacheManager isPreCacheSupportedWithUrl:url videoExtension:videoExtension]){
+                [[VideoPreloadManager shared] addWithUrl:url];
+                /*if ([_cacheManager isPreCacheSupportedWithUrl:url videoExtension:videoExtension]){
                     [_cacheManager setMaxCacheSize:maxCacheSize];
                     [_cacheManager preCacheURL:url cacheKey:cacheKey videoExtension:videoExtension withHeaders:headers completionHandler:^(BOOL success){
                     }];
                 } else {
                     NSLog(@"Pre cache is not supported for given data source.");
-                }
+                }*/
             }
             result(nil);
         } else if ([@"clearCache" isEqualToString:call.method]){
-            [_cacheManager clearCache];
+            //[_cacheManager clearCache];
+            [VideoCacheManagerUtils cleanAllCacheAndReturnError:nil];
             result(nil);
         } else if ([@"stopPreCache" isEqualToString:call.method]){
-            NSString* urlArg = argsMap[@"url"];
+            /*NSString* urlArg = argsMap[@"url"];
             NSString* cacheKey = argsMap[@"cacheKey"];
             NSString* videoExtension = argsMap[@"videoExtension"];
             if (urlArg != [NSNull null]){
@@ -464,7 +450,7 @@ bool _remoteCommandsInitialized = false;
                 } else {
                     NSLog(@"Stop pre cache is not supported for given data source.");
                 }
-            }
+            }*/
             result(nil);
         } else {
             result(FlutterMethodNotImplemented);

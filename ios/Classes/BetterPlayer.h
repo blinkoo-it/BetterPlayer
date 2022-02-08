@@ -14,9 +14,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class CacheManager;
+@class VideoPlayerView;
 
 @interface BetterPlayer : NSObject <FlutterPlatformView, FlutterStreamHandler, AVPictureInPictureControllerDelegate>
-@property(readonly, nonatomic) AVPlayer* player;
+@property(readonly, nonatomic) VideoPlayerView* player;
 @property(readonly, nonatomic) BetterPlayerEzDrmAssetsLoaderDelegate* loaderDelegate;
 @property(nonatomic) FlutterEventChannel* eventChannel;
 @property(nonatomic) FlutterEventSink eventSink;
@@ -35,16 +36,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic) float playerRate;
 @property(nonatomic) int overriddenDuration;
 @property(nonatomic) AVPlayerTimeControlStatus lastAvPlayerTimeControlStatus;
-- (void)play;
+/*- (void)play;
 - (void)pause;
 - (void)setIsLooping:(bool)isLooping;
 - (void)updatePlayingState;
 - (int64_t) duration;
-- (int64_t) position;
+- (int64_t) position;*/
 
 - (instancetype)initWithFrame:(CGRect)frame;
 - (void)setMixWithOthers:(bool)mixWithOthers;
-- (void)seekTo:(int)location;
+/*- (void)seekTo:(int)location;
 - (void)setDataSourceAsset:(NSString*)asset withKey:(NSString*)key withCertificateUrl:(NSString*)certificateUrl withLicenseUrl:(NSString*)licenseUrl cacheKey:(NSString*)cacheKey cacheManager:(CacheManager*)cacheManager overriddenDuration:(int) overriddenDuration;
 - (void)setDataSourceURL:(NSURL*)url withKey:(NSString*)key withCertificateUrl:(NSString*)certificateUrl withLicenseUrl:(NSString*)licenseUrl withHeaders:(NSDictionary*)headers withCache:(BOOL)useCache cacheKey:(NSString*)cacheKey cacheManager:(CacheManager*)cacheManager overriddenDuration:(int) overriddenDuration videoExtension: (NSString*) videoExtension;
 - (void)setVolume:(double)volume;
@@ -55,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setPictureInPicture:(BOOL)pictureInPicture;
 - (void)disablePictureInPicture;
 - (int64_t)absolutePosition;
-- (int64_t) FLTCMTimeToMillis:(CMTime) time;
+- (int64_t) FLTCMTimeToMillis:(CMTime) time;*/
 
 - (void)clear;
 - (void)disposeSansEventChannel;

@@ -6,8 +6,9 @@
 #import <AVKit/AVKit.h>
 #import <AVFoundation/AVFoundation.h>
 
+@class VideoPlayerView;
+
 // BetterPlayerView.h
 @interface BetterPlayerView : UIView
-@property AVPlayer *player;
-@property (readonly) AVPlayerLayer *playerLayer;
+@property VideoPlayerView *player;
 @end

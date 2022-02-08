@@ -3,23 +3,16 @@
 // found in the LICENSE file.
 
 #import "BetterPlayerView.h"
+#import <GSPlayer/GSPlayer-Swift.h>
 
 // BetterPlayerView.m
 @implementation BetterPlayerView
-- (AVPlayer *)player {
-    return self.playerLayer.player;
+- (VideoPlayerView *)player {
+    return self.subviews[0];
 }
 
-- (void)setPlayer:(AVPlayer *)player {
-    self.playerLayer.player = player;
+- (void)setPlayer:(VideoPlayerView *)player {
+    [self addSubview: player];
 }
 
-// Override UIView method
-+ (Class)layerClass {
-    return [AVPlayerLayer class];
-}
-
-- (AVPlayerLayer *)playerLayer {
-    return (AVPlayerLayer *)self.layer;
-}
 @end
