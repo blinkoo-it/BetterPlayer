@@ -7,12 +7,16 @@
 
 // BetterPlayerView.m
 @implementation BetterPlayerView
+
+VideoPlayerView *_player;
+
 - (VideoPlayerView *)player {
-    return self.subviews[0];
+    return _player;
 }
 
 - (void)setPlayer:(VideoPlayerView *)player {
     [self addSubview: player];
+    _player = player;
 }
 
 @end
