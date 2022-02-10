@@ -318,6 +318,27 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
+  Future<void> preCacheAll(List<String> urls, int preCacheSize) {
+    final Map<String, dynamic> dataSourceDescription = <String, dynamic>{
+      'urls': urls,
+      'preCacheSize': preCacheSize
+    };
+    return _channel.invokeMethod<void>(
+      'preCacheAll',
+      <String, dynamic>{
+        'dataSource': dataSourceDescription,
+      },
+    );
+  }
+
+  @override
+  Future<void> stopPreCacheAll() {
+    return _channel.invokeMethod<void>(
+      'stopPreCacheAll'
+    );
+  }
+
+  @override
   Stream<VideoEvent> videoEventsFor(int? textureId) {
     return _eventChannelFor(textureId)
         .receiveBroadcastStream()

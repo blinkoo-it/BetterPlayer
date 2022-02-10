@@ -415,29 +415,28 @@ bool _remoteCommandsInitialized = false;
         } else if ([@"setMixWithOthers" isEqualToString:call.method]){
             [player setMixWithOthers:[argsMap[@"mixWithOthers"] boolValue]];
         } else if ([@"preCache" isEqualToString:call.method]){
+            result(nil);
+        } else if ([@"stopPreCache" isEqualToString:call.method]){
+            result(nil);
+        }
+        else if ([@"preCacheAll" isEqualToString:call.method]){
             NSDictionary* dataSource = argsMap[@"dataSource"];
-            NSString* urlArg = dataSource[@"uri"];
-            NSDictionary* headers = dataSource[@"headers"];
-            NSNumber* maxCacheSize = dataSource[@"maxCacheSize"];
-            NSString* videoExtension = dataSource[@"videoExtension"];
+            NSMutableArray* urlsArg = dataSource[@"urls"];
+            int64_t preCacheSize = ((NSNumber*)dataSource[@"preCacheSize"]).unsignedIntegerValue;
             
-            if (urlArg != [NSNull null]){
-                NSURL* url = [NSURL URLWithString:urlArg];
-                [[VideoPreloadManager shared] addWithUrl:url];
-                /*if ([_cacheManager isPreCacheSupportedWithUrl:url videoExtension:videoExtension]){
-                    [_cacheManager setMaxCacheSize:maxCacheSize];
-                    [_cacheManager preCacheURL:url cacheKey:cacheKey videoExtension:videoExtension withHeaders:headers completionHandler:^(BOOL success){
-                    }];
-                } else {
-                    NSLog(@"Pre cache is not supported for given data source.");
-                }*/
+            if (urlsArg != [NSNull null] && urlsArg.count > 0){
+                NSMutableArray *urls = [NSMutableArray array];
+                for(int i = 0; i<urlsArg.count; i++)
+                    [urls addObject: [NSURL URLWithString:urlsArg[i]]];
+                VideoPreloadManager.shared.preloadByteCount = preCacheSize;
+                [[VideoPreloadManager shared] setWithWaiting:urls];
             }
             result(nil);
         } else if ([@"clearCache" isEqualToString:call.method]){
             //[_cacheManager clearCache];
             [VideoCacheManagerUtils cleanAllCacheAndReturnError:nil];
             result(nil);
-        } else if ([@"stopPreCache" isEqualToString:call.method]){
+        } else if ([@"stopPreCacheAll" isEqualToString:call.method]){
             /*NSString* urlArg = argsMap[@"url"];
             NSString* cacheKey = argsMap[@"cacheKey"];
             NSString* videoExtension = argsMap[@"videoExtension"];
