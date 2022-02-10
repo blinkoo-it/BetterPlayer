@@ -303,8 +303,8 @@ bool _remoteCommandsInitialized = false;
             [_dataSourceDict setObject:dataSource forKey:[self getTextureId:player]];
             NSString* assetArg = dataSource[@"asset"];
             NSString* uriArg = dataSource[@"uri"];
-            /*NSString* key = dataSource[@"key"];
-            NSString* certificateUrl = dataSource[@"certificateUrl"];
+            NSString* key = dataSource[@"key"];
+            /*NSString* certificateUrl = dataSource[@"certificateUrl"];
             NSString* licenseUrl = dataSource[@"licenseUrl"];
             NSDictionary* headers = dataSource[@"headers"];
             NSString* cacheKey = dataSource[@"cacheKey"];
@@ -330,8 +330,8 @@ bool _remoteCommandsInitialized = false;
                     assetPath = [_registrar lookupKeyForAsset:assetArg];
                 }
             } else if (uriArg) {
-                [player.player playFor:[NSURL URLWithString:uriArg] with:useCache];
-                /*[player setDataSourceURL:[NSURL URLWithString:uriArg] withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl withHeaders:headers withCache: useCache cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration videoExtension: videoExtension];*/
+                //[player.player playFor:[NSURL URLWithString:uriArg] with:useCache];
+                [player setDataSourceURL:[NSURL URLWithString:uriArg] withKey:key withCache: useCache];
             } else {
                 result(FlutterMethodNotImplemented);
             }
@@ -369,26 +369,26 @@ bool _remoteCommandsInitialized = false;
             result(nil);
         } else if ([@"play" isEqualToString:call.method]) {
             [self setupRemoteNotification:player];
-            [player.player resume];
+            [player play];
             result(nil);
         } else if ([@"position" isEqualToString:call.method]) {
-            result(@([player.player currentDuration]));
+            result(@([player  position]));
         } else if ([@"absolutePosition" isEqualToString:call.method]) {
-            result(@([player.player totalDuration]));
+            result(@([player absolutePosition]));
         } else if ([@"seekTo" isEqualToString:call.method]) {
             //[player.player seekTo:[argsMap[@"location"] intValue] completion:nil];
             result(nil);
         } else if ([@"pause" isEqualToString:call.method]) {
-            [player.player pause];
+            [player pause];
             result(nil);
         } else if ([@"setSpeed" isEqualToString:call.method]) {
             //[player.player setSpeed:[[argsMap objectForKey:@"speed"] doubleValue] result:result];
         }else if ([@"setTrackParameters" isEqualToString:call.method]) {
-            /*int width = [argsMap[@"width"] intValue];
+            int width = [argsMap[@"width"] intValue];
             int height = [argsMap[@"height"] intValue];
             int bitrate = [argsMap[@"bitrate"] intValue];
 
-            [player setTrackParameters:width: height : bitrate];*/
+            [player setTrackParameters:width: height : bitrate];
             result(nil);
         } else if ([@"enablePictureInPicture" isEqualToString:call.method]){
             /*double left = [argsMap[@"left"] doubleValue];
