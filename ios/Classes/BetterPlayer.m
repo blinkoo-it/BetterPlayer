@@ -75,13 +75,7 @@ AVPictureInPictureController *_pipController;
     _disposed = false;
     _failedCount = 0;
     _key = nil;
-    if (_player.currentItem == nil) {
-        return;
-    }
-
-    [self removeObservers];
-    AVAsset* asset = [_player.currentItem asset];
-    [asset cancelLoading];
+    [_player clear];
     [self removeObservers];
 }
 
@@ -672,6 +666,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
     [self pause];
     [self disposeSansEventChannel];
     [_eventChannel setStreamHandler:nil];
+    _player = nil;
     //[self disablePictureInPicture];
     //[self setPictureInPicture:false];
     _disposed = true;
