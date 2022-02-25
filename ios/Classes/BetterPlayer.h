@@ -50,8 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 /*- (void)seekTo:(int)location;
 - (void)setDataSourceAsset:(NSString*)asset withKey:(NSString*)key withCertificateUrl:(NSString*)certificateUrl withLicenseUrl:(NSString*)licenseUrl cacheKey:(NSString*)cacheKey cacheManager:(CacheManager*)cacheManager overriddenDuration:(int) overriddenDuration;*/
 - (void)setDataSourceURL:(NSURL*)url withKey:(NSString*)key withCache:(BOOL)useCache;
-/*- (void)setVolume:(double)volume;
-- (void)setSpeed:(double)speed result:(FlutterResult)result;
+- (void)setVolume:(double)volume;
+/*- (void)setSpeed:(double)speed result:(FlutterResult)result;
 - (void) setAudioTrack:(NSString*) name index:(int) index;
 
 - (void) enablePictureInPicture: (CGRect) frame;

@@ -173,8 +173,12 @@ abstract class VideoPlayerPlatform {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
   }
 
-  Future<void> clearCache() {
+  Future<void> clearCache({List<String>? exceptsUrls = null}) {
     throw UnimplementedError('clearCache() has not been implemented.');
+  }
+
+  Future<void> clearCacheForUrls(List<String> urls) {
+    throw UnimplementedError('clearCacheForUrls() has not been implemented.');
   }
 
   /// Returns a widget displaying the video with a given textureID.

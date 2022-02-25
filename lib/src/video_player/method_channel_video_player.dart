@@ -281,10 +281,18 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
-  Future<void> clearCache() {
+  Future<void> clearCache({List<String>? exceptsUrls}) {
+    Map<String, dynamic>? dataSourceDescription = null;
+    if(exceptsUrls != null) {
+      dataSourceDescription = <String, dynamic>{
+        'exceptsUrls': exceptsUrls,
+      };
+    }
     return _channel.invokeMethod<void>(
       'clearCache',
-      <String, dynamic>{},
+      <String, dynamic>{
+        'dataSource': dataSourceDescription,
+      },
     );
   }
 
@@ -335,6 +343,19 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   Future<void> stopPreCacheAll() {
     return _channel.invokeMethod<void>(
       'stopPreCacheAll'
+    );
+  }
+
+  @override
+  Future<void> clearCacheForUrls(List<String> urls) {
+    final Map<String, dynamic> dataSourceDescription = <String, dynamic>{
+      'urls': urls,
+    };
+    return _channel.invokeMethod<void>(
+      'clearCacheForUrls',
+      <String, dynamic>{
+        'dataSource': dataSourceDescription,
+      },
     );
   }
 

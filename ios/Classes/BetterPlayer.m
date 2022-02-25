@@ -49,11 +49,11 @@ AVPictureInPictureController *_pipController;
 
 - (void)addObservers:(AVPlayerItem*)item {
     if (!self._observersAdded){
-        /*[_player addObserver:self forKeyPath:@"rate" options:0 context:nil];
-        [item addObserver:self forKeyPath:@"loadedTimeRanges" options:0 context:timeRangeContext];*/
+        [_player.nativePlayer addObserver:self forKeyPath:@"rate" options:0 context:nil];
+        [item addObserver:self forKeyPath:@"loadedTimeRanges" options:0 context:timeRangeContext];
         [item addObserver:self forKeyPath:@"status" options:0 context:statusContext];
         [item addObserver:self forKeyPath:@"presentationSize" options:0 context:presentationSizeContext];
-        /*[item addObserver:self
+        [item addObserver:self
                forKeyPath:@"playbackLikelyToKeepUp"
                   options:0
                   context:playbackLikelyToKeepUpContext];
@@ -64,7 +64,7 @@ AVPictureInPictureController *_pipController;
         [item addObserver:self
                forKeyPath:@"playbackBufferFull"
                   options:0
-                  context:playbackBufferFullContext];*/
+                  context:playbackBufferFullContext];
         self._observersAdded = true;
     }
 }
@@ -81,14 +81,14 @@ AVPictureInPictureController *_pipController;
 
 - (void) removeObservers{
     if (self._observersAdded){
-        //[_player removeObserver:self forKeyPath:@"rate" context:nil];
+        [_player.nativePlayer removeObserver:self forKeyPath:@"rate" context:nil];
         [[_player currentItem] removeObserver:self forKeyPath:@"status" context:statusContext];
         [[_player currentItem] removeObserver:self forKeyPath:@"presentationSize" context:presentationSizeContext];
-        /*[_player removeObserver:self forKeyPath:@"loadedTimeRanges" context:timeRangeContext];
-        [_player removeObserver:self forKeyPath:@"playbackLikelyToKeepUp" context:playbackLikelyToKeepUpContext];
-        [_player removeObserver:self forKeyPath:@"playbackBufferEmpty" context:playbackBufferEmptyContext];
-        [_player removeObserver:self forKeyPath:@"playbackBufferFull" context:playbackBufferFullContext];
-        [[NSNotificationCenter defaultCenter] removeObserver:self];*/
+        [[_player currentItem] removeObserver:self forKeyPath:@"loadedTimeRanges" context:timeRangeContext];
+        [[_player currentItem] removeObserver:self forKeyPath:@"playbackLikelyToKeepUp" context:playbackLikelyToKeepUpContext];
+        [[_player currentItem] removeObserver:self forKeyPath:@"playbackBufferEmpty" context:playbackBufferEmptyContext];
+        [[_player currentItem] removeObserver:self forKeyPath:@"playbackBufferFull" context:playbackBufferFullContext];
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
         self._observersAdded = false;
     }
 }
@@ -232,9 +232,9 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
                       ofObject:(id)object
                         change:(NSDictionary*)change
                        context:(void*)context {
-/*
+
     if ([path isEqualToString:@"rate"]) {
-        if (@available(iOS 10.0, *)) {
+        /*if (@available(iOS 10.0, *)) {
             if (_pipController.pictureInPictureActive == true){
                 if (_lastAvPlayerTimeControlStatus != [NSNull null] && _lastAvPlayerTimeControlStatus == _player.timeControlStatus){
                     return;
@@ -250,18 +250,16 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
                 }
                 if (_player.timeControlStatus == AVPlayerTimeControlStatusPlaying){
                     _lastAvPlayerTimeControlStatus = _player.timeControlStatus;
-                    if (_eventSink != nil) {
-                      _eventSink(@{@"event" : @"play"});
-                    }
+                    
                 }
             }
-        }
+        }*/
 
-        if (_player.rate == 0 && //if player rate dropped to 0
-            CMTIME_COMPARE_INLINE(_player.currentItem.currentTime, >, kCMTimeZero) && //if video was started
-            CMTIME_COMPARE_INLINE(_player.currentItem.currentTime, <, _player.currentItem.duration) && //but not yet finished
-            _isPlaying) { //instance variable to handle overall state (changed to YES when user triggers playback)
-            [self handleStalled];
+        if (_player.nativePlayer.rate == 1 && !_isPlaying) { //instance variable to handle overall state (changed to YES when user triggers playback)
+            _isPlaying = true;
+            if (_eventSink != nil) {
+              _eventSink(@{@"event" : @"play"});
+            }
         }
     }
 
@@ -283,7 +281,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
             }
             _eventSink(@{@"event" : @"bufferingUpdate", @"values" : values, @"key" : _key});
         }
-    }*/
+    }
     if (context == presentationSizeContext){
         [self onReadyToPlay];
     }
@@ -310,9 +308,9 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
                 break;
         }
     }
-    /*else if (context == playbackLikelyToKeepUpContext) {
+    else if (context == playbackLikelyToKeepUpContext) {
         if ([[_player currentItem] isPlaybackLikelyToKeepUp]) {
-            [self updatePlayingState];
+            //[self updatePlayingState];
             if (_eventSink != nil) {
                 _eventSink(@{@"event" : @"bufferingEnd", @"key" : _key});
             }
@@ -325,7 +323,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
         if (_eventSink != nil) {
             _eventSink(@{@"event" : @"bufferingEnd", @"key" : _key});
         }
-    }*/
+    }
 }
 /*
 - (void)updatePlayingState {
@@ -354,7 +352,7 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
         if (![_player currentItem]) {
             return;
         }
-        if (_player.player.status != AVPlayerStatusReadyToPlay) {
+        if (_player.nativePlayer.status != AVPlayerStatusReadyToPlay) {
             return;
         }
 
@@ -427,6 +425,10 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 - (int64_t)absolutePosition {
     return [BetterPlayerTimeUtils FLTNSTimeIntervalToMillis:([[[_player currentItem] currentDate] timeIntervalSince1970])];
 }
+
+- (void)setVolume:(double)volume {
+    _player.nativePlayer.volume = (float)((volume < 0.0) ? 0.0 : ((volume > 1.0) ? 1.0 : volume));
+}
 /*
 - (void)seekTo:(int)location {
     ///When player is playing, pause video, seek to new position and start again. This will prevent issues with seekbar jumps.
@@ -447,10 +449,6 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 
 - (void)setIsLooping:(bool)isLooping {
     _isLooping = isLooping;
-}
-
-- (void)setVolume:(double)volume {
-    _player.volume = (float)((volume < 0.0) ? 0.0 : ((volume > 1.0) ? 1.0 : volume));
 }
 
 - (void)setSpeed:(double)speed result:(FlutterResult)result {

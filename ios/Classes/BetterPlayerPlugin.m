@@ -177,8 +177,8 @@ bool _remoteCommandsInitialized = false;
 }
 
 - (void) setupRemoteCommandNotification:(BetterPlayer*)player, NSString* title, NSString* author , NSString* imageUrl{
-    float positionInSeconds = player.player.currentDuration /1000;
-    float durationInSeconds = player.player.totalDuration / 1000;
+    float positionInSeconds = player.position /1000;
+    float durationInSeconds = player.duration / 1000;
 
 
     NSMutableDictionary * nowPlayingInfoDict = [@{MPMediaItemPropertyArtist: author,
@@ -365,7 +365,7 @@ bool _remoteCommandsInitialized = false;
             [player setIsLooping:[argsMap[@"looping"] boolValue]];
             result(nil);
         } else if ([@"setVolume" isEqualToString:call.method]) {
-            [player.player setVolume:[argsMap[@"volume"] doubleValue]];
+            [player setVolume:[argsMap[@"volume"] doubleValue]];
             result(nil);
         } else if ([@"play" isEqualToString:call.method]) {
             [self setupRemoteNotification:player];
@@ -433,8 +433,14 @@ bool _remoteCommandsInitialized = false;
             }
             result(nil);
         } else if ([@"clearCache" isEqualToString:call.method]){
-            //[_cacheManager clearCache];
-            [VideoCacheManagerUtils cleanAllCacheAndReturnError:nil];
+            NSDictionary* dataSource = argsMap[@"dataSource"];
+            NSMutableArray* urlsArg = dataSource[@"exceptsUrls"];
+            NSMutableArray *urls = [NSMutableArray array];
+            if (urlsArg != [NSNull null] && urlsArg.count > 0){
+                for(int i = 0; i<urlsArg.count; i++)
+                    [urls addObject: [NSURL URLWithString:urlsArg[i]]];
+            }
+            [VideoCacheManagerUtils cleanAllCacheWithExcepts:urls error:nil];
             result(nil);
         } else if ([@"stopPreCacheAll" isEqualToString:call.method]){
             /*NSString* urlArg = argsMap[@"url"];
@@ -450,6 +456,16 @@ bool _remoteCommandsInitialized = false;
                     NSLog(@"Stop pre cache is not supported for given data source.");
                 }
             }*/
+            result(nil);
+        } else if ([@"clearCacheForUrls" isEqualToString:call.method]){
+            NSDictionary* dataSource = argsMap[@"dataSource"];
+            NSMutableArray* urlsArg = dataSource[@"urls"];
+            
+            if (urlsArg != [NSNull null] && urlsArg.count > 0){
+                for(int i = 0; i<urlsArg.count; i++) {
+                    [VideoCacheManagerUtils deleteFileFor:[NSURL URLWithString:urlsArg[i]] error:nil];
+                }
+            }
             result(nil);
         } else {
             result(FlutterMethodNotImplemented);
