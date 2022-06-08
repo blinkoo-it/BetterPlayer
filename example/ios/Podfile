@@ -30,6 +30,9 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
+  
+  #pod 'GSPlayer', :git => 'https://github.com/blinkoo-it/iOSVideoPlayer.git', :branch => 'feature/addSingleUrlToPreload'
+  pod 'GSPlayer', :path => '~/Projects/iOSVideoPlayer/iOSVideoPlayer'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end

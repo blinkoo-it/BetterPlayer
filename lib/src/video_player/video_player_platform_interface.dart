@@ -81,6 +81,16 @@ abstract class VideoPlayerPlatform {
     throw UnimplementedError('stopPreCache() has not been implemented.');
   }
 
+  /// Pre-caches a video.
+  Future<void> preCacheAll(List<String> urls, int preCacheSize) {
+    throw UnimplementedError('preCacheAll() has not been implemented.');
+  }
+
+  /// Pre-caches a video.
+  Future<void> stopPreCacheAll() {
+    throw UnimplementedError('stopPreCacheAll() has not been implemented.');
+  }
+
   /// Set data source of video.
   Future<void> setDataSource(int? textureId, DataSource dataSource) {
     throw UnimplementedError('setDataSource() has not been implemented.');
@@ -163,8 +173,12 @@ abstract class VideoPlayerPlatform {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
   }
 
-  Future<void> clearCache() {
+  Future<void> clearCache({List<String>? exceptsUrls = null}) {
     throw UnimplementedError('clearCache() has not been implemented.');
+  }
+
+  Future<void> clearCacheForUrls(List<String> urls) {
+    throw UnimplementedError('clearCacheForUrls() has not been implemented.');
   }
 
   /// Returns a widget displaying the video with a given textureID.
