@@ -435,7 +435,7 @@ bool _remoteCommandsInitialized = false;
         } else if ([@"clearCache" isEqualToString:call.method]){
             NSDictionary* dataSource = argsMap[@"dataSource"];
             long timestamp = [argsMap[@"beforeTimeStamp"] intValue];
-            NSDate* = [NSDate dateWithTimeIntervalSince1970:timestamp];
+            NSDate* nsDate = [NSDate dateWithTimeIntervalSince1970:timestamp];
             [VideoCacheManagerUtils cleanAllCacheBeforeDate:nsDate error:nil];
             //[VideoCacheManagerUtils cleanAllCacheWithExcepts:urls error:nil];
             result(nil);
