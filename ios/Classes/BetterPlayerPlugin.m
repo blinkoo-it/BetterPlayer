@@ -435,9 +435,7 @@ bool _remoteCommandsInitialized = false;
         } else if ([@"clearCache" isEqualToString:call.method]){
             NSDictionary* dataSource = argsMap[@"dataSource"];
             long timestamp = [argsMap[@"beforeTimeStamp"] longValue];
-            NSDate* nsDate = [NSDate dateWithTimeIntervalSince1970:timestamp];
-            [VideoCacheManagerUtils cleanAllCacheBeforeDate:nsDate error:nil];
-            //[VideoCacheManagerUtils cleanAllCacheWithExcepts:urls error:nil];
+            [VideoCacheManagerUtils cleanAllCacheBeforeTimestamp:timestamp error:nil];
             result(nil);
         } else if ([@"stopPreCacheAll" isEqualToString:call.method]){
             /*NSString* urlArg = argsMap[@"url"];
