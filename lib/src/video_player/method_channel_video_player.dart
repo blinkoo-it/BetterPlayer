@@ -281,17 +281,11 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
-  Future<void> clearCache({List<String>? exceptsUrls}) {
-    Map<String, dynamic>? dataSourceDescription = null;
-    if(exceptsUrls != null) {
-      dataSourceDescription = <String, dynamic>{
-        'exceptsUrls': exceptsUrls,
-      };
-    }
+  Future<void> clearCache({int beforeTimestamp = 0}) {
     return _channel.invokeMethod<void>(
       'clearCache',
       <String, dynamic>{
-        'dataSource': dataSourceDescription,
+        'beforeTimeStamp': beforeTimestamp,
       },
     );
   }
