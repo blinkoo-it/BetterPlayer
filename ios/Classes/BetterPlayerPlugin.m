@@ -376,7 +376,7 @@ bool _remoteCommandsInitialized = false;
         } else if ([@"absolutePosition" isEqualToString:call.method]) {
             result(@([player absolutePosition]));
         } else if ([@"seekTo" isEqualToString:call.method]) {
-            //[player.player seekTo:[argsMap[@"location"] intValue] completion:nil];
+            [player seekTo:[argsMap[@"location"] intValue]];
             result(nil);
         } else if ([@"pause" isEqualToString:call.method]) {
             [player pause];

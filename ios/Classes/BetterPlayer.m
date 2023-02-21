@@ -429,7 +429,6 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
 - (void)setVolume:(double)volume {
     _player.nativePlayer.volume = (float)((volume < 0.0) ? 0.0 : ((volume > 1.0) ? 1.0 : volume));
 }
-/*
 - (void)seekTo:(int)location {
     ///When player is playing, pause video, seek to new position and start again. This will prevent issues with seekbar jumps.
     bool wasPlaying = _isPlaying;
@@ -437,16 +436,14 @@ static inline CGFloat radiansToDegrees(CGFloat radians) {
         [_player pause];
     }
 
-    [_player seekToTime:CMTimeMake(location, 1000)
-        toleranceBefore:kCMTimeZero
-         toleranceAfter:kCMTimeZero
-      completionHandler:^(BOOL finished){
+    [_player seekTo:CMTimeMake(location, 1000)
+      completion:^(BOOL finished){
         if (wasPlaying){
-            _player.rate = _playerRate;
+            [self->_player resume];
         }
     }];
 }
-
+/*
 - (void)setIsLooping:(bool)isLooping {
     _isLooping = isLooping;
 }
