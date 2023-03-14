@@ -173,7 +173,7 @@ abstract class VideoPlayerPlatform {
     throw UnimplementedError('setMixWithOthers() has not been implemented.');
   }
 
-  Future<void> clearCache({required int beforeTimestamp}) {
+  Future<void> clearCache() {
     throw UnimplementedError('clearCache() has not been implemented.');
   }
 

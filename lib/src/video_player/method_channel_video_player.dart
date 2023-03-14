@@ -281,12 +281,9 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
-  Future<void> clearCache({int beforeTimestamp = 0}) {
+  Future<void> clearCache() {
     return _channel.invokeMethod<void>(
       'clearCache',
-      <String, dynamic>{
-        'beforeTimeStamp': beforeTimestamp,
-      },
     );
   }
 
@@ -335,9 +332,7 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
 
   @override
   Future<void> stopPreCacheAll() {
-    return _channel.invokeMethod<void>(
-      'stopPreCacheAll'
-    );
+    return _channel.invokeMethod<void>('stopPreCacheAll');
   }
 
   @override
